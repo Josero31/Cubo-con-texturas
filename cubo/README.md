@@ -66,8 +66,16 @@ pollster = "0.3"
 ```
 
 ### Paso 3: Compilar y Ejecutar
+
+**⚠️ IMPORTANTE: En PowerShell, usa este comando completo:**
+```powershell
+# Navegar al directorio del proyecto y ejecutar
+Set-Location "C:\graficas x computadora\Cubo-con-texturas\cubo"; cargo run
+```
+
+**Alternativamente, puedes usar comandos separados:**
 ```bash
-# Compilar el proyecto
+# Compilar el proyecto (opcional)
 cargo build
 
 # Ejecutar en modo debug (recomendado para desarrollo)
@@ -76,6 +84,8 @@ cargo run
 # Ejecutar en modo release (optimizado)
 cargo run --release
 ```
+
+**Nota:** Asegúrate de estar en el directorio `cubo/` antes de ejecutar `cargo run`.
 
 ### Paso 4: Verificar Ejecución Exitosa
 Al ejecutar el programa, deberías ver:
