@@ -34,32 +34,14 @@ impl Vertex {
     }
 }
 
-// Cubo simple - solo cambio los vértices, mantengo shader que funciona
+// Triángulo grande y simple para asegurar que se vea
 const VERTICES: &[Vertex] = &[
-    // Cara frontal - cubo simple
-    Vertex { position: [-0.5, -0.5,  0.1], tex_coords: [0.0, 1.0] },
-    Vertex { position: [ 0.5, -0.5,  0.1], tex_coords: [1.0, 1.0] },
-    Vertex { position: [ 0.5,  0.5,  0.1], tex_coords: [1.0, 0.0] },
-    Vertex { position: [-0.5,  0.5,  0.1], tex_coords: [0.0, 0.0] },
-    
-    // Cara derecha - para dar efecto 3D
-    Vertex { position: [ 0.5, -0.5,  0.1], tex_coords: [0.0, 1.0] },
-    Vertex { position: [ 0.7, -0.3, -0.1], tex_coords: [1.0, 1.0] },
-    Vertex { position: [ 0.7,  0.7, -0.1], tex_coords: [1.0, 0.0] },
-    Vertex { position: [ 0.5,  0.5,  0.1], tex_coords: [0.0, 0.0] },
-    
-    // Cara superior - para dar efecto 3D
-    Vertex { position: [-0.5,  0.5,  0.1], tex_coords: [0.0, 1.0] },
-    Vertex { position: [ 0.5,  0.5,  0.1], tex_coords: [1.0, 1.0] },
-    Vertex { position: [ 0.7,  0.7, -0.1], tex_coords: [1.0, 0.0] },
-    Vertex { position: [-0.3,  0.7, -0.1], tex_coords: [0.0, 0.0] },
+    Vertex { position: [-2.0, -2.0, 0.0], tex_coords: [0.0, 1.0] },
+    Vertex { position: [ 2.0, -2.0, 0.0], tex_coords: [1.0, 1.0] },
+    Vertex { position: [ 0.0,  2.0, 0.0], tex_coords: [0.5, 0.0] },
 ];
 
-const INDICES: &[u16] = &[
-    0,  1,  2,   2,  3,  0,   // frontal
-    4,  5,  6,   6,  7,  4,   // derecha  
-    8,  9,  10,  10, 11, 8,   // superior
-];
+const INDICES: &[u16] = &[0, 1, 2];
 
 fn main() {
     env_logger::init();
@@ -67,7 +49,7 @@ fn main() {
     let event_loop = EventLoop::new().unwrap();
     let window = Arc::new(
         WindowBuilder::new()
-            .with_title("🔥 CUBO MEDIANO - VERSION SIMPLE 🔥")
+            .with_title("CUBO CON TEXTURA - VERSIÓN SIMPLE")
             .with_inner_size(winit::dpi::LogicalSize::new(800, 600))
             .build(&event_loop)
             .unwrap(),
@@ -93,6 +75,7 @@ fn main() {
             label: None,
             required_features: wgpu::Features::empty(),
             required_limits: wgpu::Limits::default(),
+            memory_hints: wgpu::MemoryHints::default(),
         },
         None,
     )).unwrap();
@@ -214,7 +197,7 @@ fn main() {
         label: Some("bind_group"),
     });
 
-    // Shader simple que SÍ funciona
+    // Shader simple
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("Shader"),
         source: wgpu::ShaderSource::Wgsl(r#"
@@ -277,7 +260,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             topology: wgpu::PrimitiveTopology::TriangleList,
             strip_index_format: None,
             front_face: wgpu::FrontFace::Ccw,
-            cull_mode: None, // Sin culling como en la versión que funcionaba
+            cull_mode: None,
             polygon_mode: wgpu::PolygonMode::Fill,
             unclipped_depth: false,
             conservative: false,
@@ -289,12 +272,10 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
             alpha_to_coverage_enabled: false,
         },
         multiview: None,
+        cache: None,
     });
 
     println!("🔥 PIPELINE CREADO - ¡DEBERÍAS VER EL TRIÁNGULO CON TEXTURA!");
-
-    // Solicitar el primer redraw
-    window.request_redraw();
 
     event_loop.run(move |event, target| {
         match event {
@@ -304,11 +285,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                         println!("🔥 CERRANDO VENTANA");
                         target.exit()
                     },
-                    WindowEvent::Resized(physical_size) => {
-                        println!("🔥 VENTANA REDIMENSIONADA: {}x{}", physical_size.width, physical_size.height);
-                    },
                     WindowEvent::RedrawRequested => {
-                        println!("🔥 REDIBUJANDO...");
                         let output = surface.get_current_texture().unwrap();
                         let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
 
@@ -351,10 +328,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
                     }
                     _ => {}
                 }
-            }
-            Event::AboutToWait => {
-                // Solo solicitar redraw si es necesario (no continuo)
-                // window.request_redraw();
             }
             _ => {}
         }
